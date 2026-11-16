@@ -1,0 +1,15 @@
+{
+  "name": "elevate-careers-platform",
+  "version": "1.0.0",
+  "description": "Professional Job Board Platform connecting tech talent with top Indian employers",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "seed": "cd backend && npm run seed",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": ["job-board", "react", "express", "mongodb", "tailwind", "jwt"],
+  "author": "",
+  "license": "ISC"
+}
