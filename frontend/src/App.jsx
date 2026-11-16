@@ -20,7 +20,7 @@ import NotFoundPage from './pages/NotFoundPage';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={import.meta.env.BASE_URL}>
         <div className="flex flex-col min-h-screen bg-[#F7F7F2] text-[#242424] antialiased selection:bg-[#C5F36A] selection:text-[#242424]">
           <Navbar />
           <main className="flex-grow">

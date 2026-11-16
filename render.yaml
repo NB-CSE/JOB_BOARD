@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: elevate-careers-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLIENT_URL
+        value: https://nb-cse.github.io/JOB-BOARD/
