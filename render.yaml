@@ -16,4 +16,4 @@ services:
       - key: JWT_EXPIRE
         value: 30d
       - key: CLIENT_URL
-        value: https://nb-cse.github.io/JOB-BOARD/
+        value: https://nb-cse.github.io/JOB_BOARD/
