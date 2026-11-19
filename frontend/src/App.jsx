@@ -17,16 +17,21 @@ import EmployerDashboard from './pages/EmployerDashboard';
 import CandidateDashboard from './pages/CandidateDashboard';
 import NotFoundPage from './pages/NotFoundPage';
 
+const rawBase = import.meta.env.BASE_URL || '/';
+const basename = rawBase === '/' ? '/' : rawBase.replace(/\/+$/, '');
+
 function App() {
   return (
     <AuthProvider>
-      <Router basename={import.meta.env.BASE_URL}>
+      <Router basename={basename}>
         <div className="flex flex-col min-h-screen bg-[#F7F7F2] text-[#242424] antialiased selection:bg-[#C5F36A] selection:text-[#242424]">
           <Navbar />
           <main className="flex-grow">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
+              <Route index element={<HomePage />} />
+              <Route path="" element={<HomePage />} />
               <Route path="/jobs" element={<JobListingsPage />} />
               <Route path="/jobs/:id" element={<JobDetailPage />} />
               <Route path="/companies" element={<CompaniesPage />} />

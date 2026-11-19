@@ -43,10 +43,6 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
 
-      - name: Copy index.html to 404.html for client-side routing
-        run: |
-          cp frontend/dist/index.html frontend/dist/404.html
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
