@@ -43,13 +43,24 @@ api.interceptors.response.use(
   }
 );
 
+// Check if running on GitHub Pages (purely static hosting with no backend port)
+const isStaticHost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname.includes('github.io') ||
+    (!import.meta.env.VITE_API_URL && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'));
+
 // Safe helper that attempts backend API call and falls back seamlessly to mock data
-const safeCall = async (apiPromise, fallbackFn) => {
+const safeCall = async (apiFn, fallbackFn) => {
+  // If on GitHub Pages without a remote VITE_API_URL, resolve immediately from mock store for instant 0ms response
+  if (isStaticHost && !import.meta.env.VITE_API_URL) {
+    const fallbackData = await fallbackFn();
+    return { data: fallbackData, status: 200, statusText: 'OK (Mock Store)' };
+  }
+
   try {
-    const response = await apiPromise;
+    const response = await apiFn();
     return response;
   } catch (err) {
-    // If backend is offline, 404, network error, or hosted on static GitHub Pages
     console.info('Elevate Careers: using client-side offline mock store fallback.');
     const fallbackData = await fallbackFn();
     return { data: fallbackData, status: 200, statusText: 'OK (Mock Fallback)' };
@@ -78,7 +89,7 @@ const setLocalData = (key, val) => {
 export const authService = {
   login: (credentials) =>
     safeCall(
-      api.post('/auth/login', credentials),
+      () => api.post('/auth/login', credentials),
       () => {
         const email = credentials.email.toLowerCase().trim();
         const isEmployer = email.includes('employer') || email.includes('recruiter') || email.includes('razorpay');
@@ -97,7 +108,7 @@ export const authService = {
 
   register: (userData) =>
     safeCall(
-      api.post('/auth/register', userData),
+      () => api.post('/auth/register', userData),
       () => {
         const newUser = {
           _id: 'user_' + Date.now(),
@@ -121,7 +132,7 @@ export const authService = {
 
   getMe: () =>
     safeCall(
-      api.get('/auth/me'),
+      () => api.get('/auth/me'),
       () => {
         const stored = getLocalData('user', mockUsers[1]);
         return { success: true, user: stored };
@@ -130,7 +141,7 @@ export const authService = {
 
   updateProfile: (profileData) =>
     safeCall(
-      api.put('/auth/profile', profileData),
+      () => api.put('/auth/profile', profileData),
       () => {
         const current = getLocalData('user', mockUsers[1]);
         const updated = {
@@ -145,9 +156,10 @@ export const authService = {
 
   uploadResume: (formData) =>
     safeCall(
-      api.post('/auth/upload-resume', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
+      () =>
+        api.post('/auth/upload-resume', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
       () => {
         return {
           success: true,
@@ -163,7 +175,7 @@ export const authService = {
 export const jobService = {
   getFeaturedJobs: () =>
     safeCall(
-      api.get('/jobs/featured'),
+      () => api.get('/jobs/featured'),
       () => {
         const customJobs = getLocalData('elevate_custom_jobs', []);
         const all = [...customJobs, ...mockJobs];
@@ -173,7 +185,7 @@ export const jobService = {
 
   getJobs: (params = {}) =>
     safeCall(
-      api.get('/jobs', { params }),
+      () => api.get('/jobs', { params }),
       () => {
         const customJobs = getLocalData('elevate_custom_jobs', []);
         let list = [...customJobs, ...mockJobs];
@@ -234,7 +246,7 @@ export const jobService = {
 
   getCategories: () =>
     safeCall(
-      api.get('/jobs/categories'),
+      () => api.get('/jobs/categories'),
       () => {
         return {
           success: true,
@@ -245,7 +257,7 @@ export const jobService = {
 
   getJobById: (id) =>
     safeCall(
-      api.get(`/jobs/${id}`),
+      () => api.get(`/jobs/${id}`),
       () => {
         const customJobs = getLocalData('elevate_custom_jobs', []);
         const all = [...customJobs, ...mockJobs];
@@ -261,7 +273,7 @@ export const jobService = {
 
   createJob: (jobData) =>
     safeCall(
-      api.post('/jobs', jobData),
+      () => api.post('/jobs', jobData),
       () => {
         const newJob = {
           _id: 'job_' + Date.now(),
@@ -283,7 +295,7 @@ export const jobService = {
 
   updateJob: (id, jobData) =>
     safeCall(
-      api.put(`/jobs/${id}`, jobData),
+      () => api.put(`/jobs/${id}`, jobData),
       () => {
         const custom = getLocalData('elevate_custom_jobs', []);
         const idx = custom.findIndex((j) => j._id === id);
@@ -298,7 +310,7 @@ export const jobService = {
 
   deleteJob: (id) =>
     safeCall(
-      api.delete(`/jobs/${id}`),
+      () => api.delete(`/jobs/${id}`),
       () => {
         let custom = getLocalData('elevate_custom_jobs', []);
         custom = custom.filter((j) => j._id !== id);
@@ -309,7 +321,7 @@ export const jobService = {
 
   getEmployerJobs: () =>
     safeCall(
-      api.get('/jobs/employer/my-jobs'),
+      () => api.get('/jobs/employer/my-jobs'),
       () => {
         const custom = getLocalData('elevate_custom_jobs', []);
         const demoEmployerJobs = mockJobs.slice(0, 3);
@@ -323,9 +335,10 @@ export const jobService = {
 export const applicationService = {
   applyForJob: (jobId, formData) =>
     safeCall(
-      api.post(`/applications/${jobId}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
+      () =>
+        api.post(`/applications/${jobId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
       () => {
         const apps = getLocalData('elevate_my_applications', []);
         const job = mockJobs.find((j) => j._id === jobId) || mockJobs[0];
@@ -348,7 +361,7 @@ export const applicationService = {
 
   getMyApplications: () =>
     safeCall(
-      api.get('/applications/my-applications'),
+      () => api.get('/applications/my-applications'),
       () => {
         const apps = getLocalData('elevate_my_applications', [
           {
@@ -370,7 +383,7 @@ export const applicationService = {
 
   withdrawApplication: (id) =>
     safeCall(
-      api.put(`/applications/${id}/withdraw`),
+      () => api.put(`/applications/${id}/withdraw`),
       () => {
         let apps = getLocalData('elevate_my_applications', []);
         apps = apps.filter((a) => a._id !== id);
@@ -381,7 +394,7 @@ export const applicationService = {
 
   getEmployerApplicants: (params = {}) =>
     safeCall(
-      api.get('/applications/employer/applicants', { params }),
+      () => api.get('/applications/employer/applicants', { params }),
       () => {
         return {
           success: true,
@@ -402,7 +415,7 @@ export const applicationService = {
 
   updateApplicationStatus: (id, statusData) =>
     safeCall(
-      api.put(`/applications/${id}/status`, statusData),
+      () => api.put(`/applications/${id}/status`, statusData),
       () => {
         return { success: true, message: 'Application status updated to ' + statusData.status };
       }
@@ -415,7 +428,7 @@ export const applicationService = {
 export const userService = {
   getSavedJobs: () =>
     safeCall(
-      api.get('/users/saved-jobs'),
+      () => api.get('/users/saved-jobs'),
       () => {
         const savedIds = getLocalData('elevate_saved_job_ids', [mockJobs[0]._id, mockJobs[1]._id]);
         const jobs = mockJobs.filter((j) => savedIds.includes(j._id));
@@ -425,7 +438,7 @@ export const userService = {
 
   saveJob: (jobId) =>
     safeCall(
-      api.post(`/users/saved-jobs/${jobId}`),
+      () => api.post(`/users/saved-jobs/${jobId}`),
       () => {
         const savedIds = getLocalData('elevate_saved_job_ids', []);
         if (!savedIds.includes(jobId)) savedIds.push(jobId);
@@ -436,7 +449,7 @@ export const userService = {
 
   unsaveJob: (jobId) =>
     safeCall(
-      api.delete(`/users/saved-jobs/${jobId}`),
+      () => api.delete(`/users/saved-jobs/${jobId}`),
       () => {
         let savedIds = getLocalData('elevate_saved_job_ids', []);
         savedIds = savedIds.filter((id) => id !== jobId);
@@ -447,7 +460,7 @@ export const userService = {
 
   getCompanies: () =>
     safeCall(
-      api.get('/users/companies'),
+      () => api.get('/users/companies'),
       () => {
         return { success: true, count: mockCompanies.length, companies: mockCompanies };
       }
@@ -458,7 +471,7 @@ export const userService = {
 export const insightService = {
   getSalaryBenchmarks: () =>
     safeCall(
-      api.get('/insights/salary-benchmarks'),
+      () => api.get('/insights/salary-benchmarks'),
       () => {
         return { success: true, count: mockSalaryBenchmarks.length, benchmarks: mockSalaryBenchmarks };
       }
@@ -466,7 +479,7 @@ export const insightService = {
 
   getLocations: () =>
     safeCall(
-      api.get('/insights/locations'),
+      () => api.get('/insights/locations'),
       () => {
         return { success: true, count: mockLocations.length, locations: mockLocations };
       }
@@ -474,7 +487,7 @@ export const insightService = {
 
   getSkills: () =>
     safeCall(
-      api.get('/insights/skills'),
+      () => api.get('/insights/skills'),
       () => {
         return { success: true, count: mockSkills.length, skills: mockSkills };
       }
@@ -482,7 +495,7 @@ export const insightService = {
 
   calculateProjection: (data) =>
     safeCall(
-      api.post('/insights/calculate', data),
+      () => api.post('/insights/calculate', data),
       () => {
         return {
           success: true,
