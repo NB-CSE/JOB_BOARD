@@ -633,43 +633,59 @@ export const mockCompanies = [
   },
 ];
 
-export const calculateMockSalary = ({ roleId, experienceLevel, locationCity, userSkills = [] }) => {
+export const calculateMockSalary = ({ roleId, experienceLevel, locationCity, location, userSkills = [] }) => {
+  const chosenLoc = location || locationCity || 'Bengaluru';
   const benchmark = mockSalaryBenchmarks.find((b) => b.roleId === roleId) || mockSalaryBenchmarks[0];
-  const levelData =
-    benchmark.experienceLevels[experienceLevel] ||
-    benchmark.experienceLevels['Mid-level (3-5 yrs)'] ||
-    Object.values(benchmark.experienceLevels)[0];
+  const expBracket =
+    (benchmark.experienceLevels && benchmark.experienceLevels[experienceLevel]) ||
+    (benchmark.experienceLevels && benchmark.experienceLevels['Mid-level (3-5 yrs)']) ||
+    (benchmark.experienceLevels && Object.values(benchmark.experienceLevels)[0]) ||
+    { min: 14, median: 22, max: 32 };
 
-  const loc = mockLocations.find((l) => l.city === locationCity) || { salaryMultiplier: 1.0 };
-  const multiplier = loc.salaryMultiplier;
+  const loc = mockLocations.find((l) => l.city.toLowerCase() === chosenLoc.toLowerCase()) || {
+    city: chosenLoc,
+    salaryMultiplier: 1.0,
+  };
+  const multiplier = loc.salaryMultiplier || 1.0;
 
   let skillPremium = 0;
-  if (Array.isArray(userSkills) && userSkills.length > 0) {
+  if (Array.isArray(userSkills) && userSkills.length > 0 && benchmark.topSkills) {
     const matchedTop = userSkills.filter((s) => benchmark.topSkills.includes(s)).length;
     skillPremium = Math.min(matchedTop * 0.05, 0.25);
   }
 
   const factor = multiplier * (1 + skillPremium);
-  const projectedMin = Math.round(levelData.min * factor);
-  const projectedMedian = Math.round(levelData.median * factor);
-  const projectedMax = Math.round(levelData.max * factor);
+  const projectedMin = Math.round(expBracket.min * factor);
+  const projectedMedian = Math.round(expBracket.median * factor);
+  const projectedMax = Math.round(expBracket.max * factor);
 
   return {
     roleTitle: benchmark.roleTitle,
-    experienceLevel,
-    locationCity,
-    currency: 'INR',
-    period: 'LPA',
+    category: benchmark.category || 'Software Development',
+    experienceLevel: experienceLevel || 'Mid-level (3-5 yrs)',
+    location: loc.city || chosenLoc,
+    salaryRange: {
+      minLPA: projectedMin,
+      medianLPA: projectedMedian,
+      maxLPA: projectedMax,
+      currency: 'INR (₹)',
+      period: 'LPA',
+    },
     projectedRange: {
       min: projectedMin,
       median: projectedMedian,
       max: projectedMax,
     },
     locationMultiplier: multiplier,
+    cityPremium: `${Math.round((multiplier - 1) * 100)}%`,
     skillBonusApplied: `${Math.round(skillPremium * 100)}%`,
-    marketDemand: benchmark.hiringDemand,
+    topSkillsRequired: benchmark.topSkills || [],
+    hotSkillsTrending: benchmark.hotSkillsTrending || [],
+    growthRate: benchmark.growthRate || '+24% YoY',
+    marketDemand: benchmark.hiringDemand || 'High',
+    hiringDemand: benchmark.hiringDemand || 'High',
     recommendations: {
-      highPayingSkillsToLearn: benchmark.hotSkillsTrending,
+      highPayingSkillsToLearn: benchmark.hotSkillsTrending || [],
       topTechHubsForRole: ['Bengaluru', 'Hyderabad', 'Remote'],
     },
   };

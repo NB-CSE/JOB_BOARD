@@ -164,10 +164,10 @@ const SalaryCalculatorWidget = ({ className = '' }) => {
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl sm:text-4xl font-extrabold text-[#242424]">
-                    ₹{projection.salaryRange.minLPA} - ₹{projection.salaryRange.maxLPA} LPA
+                    ₹{projection.salaryRange?.minLPA || projection.projectedRange?.min || 15} - ₹{projection.salaryRange?.maxLPA || projection.projectedRange?.max || 35} LPA
                   </span>
                   <span className="text-sm font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300">
-                    Median: ₹{projection.salaryRange.medianLPA} LPA
+                    Median: ₹{projection.salaryRange?.medianLPA || projection.projectedRange?.median || 24} LPA
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">
@@ -179,12 +179,12 @@ const SalaryCalculatorWidget = ({ className = '' }) => {
               <div className="bg-white p-3.5 rounded-2xl border border-zinc-200 shadow-xs shrink-0 space-y-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-700">
                   <MapPin className="w-4 h-4 text-[#84cc16]" />
-                  <span>{projection.location}</span>
+                  <span>{projection.location || selectedLocation}</span>
                 </div>
                 <p className="text-xs font-semibold text-[#242424]">
-                  City Index: <span className="font-extrabold text-emerald-600">{projection.cityPremium}</span> vs baseline
+                  City Index: <span className="font-extrabold text-emerald-600">{projection.cityPremium || '+0%'}</span> vs baseline
                 </p>
-                <div className="text-[11px] text-zinc-400">Demand: {projection.hiringDemand}</div>
+                <div className="text-[11px] text-zinc-400">Demand: {projection.hiringDemand || projection.marketDemand || 'High'}</div>
               </div>
             </div>
 
@@ -199,7 +199,7 @@ const SalaryCalculatorWidget = ({ className = '' }) => {
                   </h4>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {projection.topSkillsRequired.map((skill, i) => (
+                  {(projection.topSkillsRequired || []).map((skill, i) => (
                     <span
                       key={i}
                       className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-zinc-200 text-zinc-800 shadow-2xs"
@@ -219,7 +219,7 @@ const SalaryCalculatorWidget = ({ className = '' }) => {
                   </h4>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {projection.hotSkillsTrending.map((skill, i) => (
+                  {(projection.hotSkillsTrending || []).map((skill, i) => (
                     <span
                       key={i}
                       className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#C5F36A] text-[#242424] border border-[#b4e850] shadow-2xs flex items-center gap-1"
@@ -238,10 +238,10 @@ const SalaryCalculatorWidget = ({ className = '' }) => {
                 Want to apply to roles matching this exact salary bracket?
               </span>
               <Link
-                to={`/jobs?keyword=${encodeURIComponent(projection.roleTitle.split(' ')[0])}&location=${encodeURIComponent(cleanLocationQuery)}&minSalary=${projection.salaryRange.minLPA}`}
+                to={`/jobs?keyword=${encodeURIComponent((projection.roleTitle || '').split(' ')[0])}&location=${encodeURIComponent(cleanLocationQuery)}&minSalary=${projection.salaryRange?.minLPA || 15}`}
                 className="inline-flex items-center justify-center gap-2 bg-[#242424] hover:bg-black text-[#C5F36A] font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md"
               >
-                <span>View Matching Jobs in {projection.location}</span>
+                <span>View Matching Jobs in {projection.location || selectedLocation}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
