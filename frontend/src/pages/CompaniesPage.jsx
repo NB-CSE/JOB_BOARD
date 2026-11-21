@@ -56,74 +56,84 @@ const CompaniesPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {companies.map((comp) => (
-              <div
-                key={comp.id || comp.name}
-                className="bg-white rounded-3xl border border-zinc-200/90 p-6 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center font-extrabold text-xl text-zinc-800 shrink-0">
-                      {comp.logo ? (
-                        <img
-                          src={comp.logo}
-                          alt={comp.name}
-                          className="w-full h-full object-cover rounded-2xl"
-                          onError={(e) => (e.target.style.display = 'none')}
-                        />
-                      ) : (
-                        comp.name.charAt(0)
-                      )}
+            {companies.map((comp) => {
+              const compName = comp.name || comp.companyName || 'Company';
+              const compLogo = comp.logo || comp.companyLogo || '';
+              const compDesc = comp.description || comp.companyDescription || '';
+              const compLoc = comp.location || comp.headquarters || 'India';
+              const compSize = comp.size || comp.companySize || '500+ employees';
+              const compWeb = comp.website || comp.companyWebsite || '';
+              const rolesCount = comp.openRolesCount ?? comp.openJobsCount ?? 1;
+
+              return (
+                <div
+                  key={comp.id || compName}
+                  className="bg-white rounded-3xl border border-zinc-200/90 p-6 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center font-extrabold text-xl text-zinc-800 shrink-0">
+                        {compLogo ? (
+                          <img
+                            src={compLogo}
+                            alt={compName}
+                            className="w-full h-full object-cover rounded-2xl"
+                            onError={(e) => (e.target.style.display = 'none')}
+                          />
+                        ) : (
+                          compName.charAt(0)
+                        )}
+                      </div>
+
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        {rolesCount} Open {rolesCount === 1 ? 'Role' : 'Roles'}
+                      </span>
                     </div>
 
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      {comp.openRolesCount} Open {comp.openRolesCount === 1 ? 'Role' : 'Roles'}
-                    </span>
+                    <h3 className="font-extrabold text-lg text-[#242424] mb-1">{compName}</h3>
+
+                    <p className="text-xs text-zinc-500 mb-3">{comp.industry || 'Technology'}</p>
+
+                    <p className="text-xs text-zinc-600 line-clamp-3 leading-relaxed mb-4">
+                      {compDesc}
+                    </p>
+
+                    <div className="space-y-1.5 text-xs text-zinc-500 pt-3 border-t border-zinc-100">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span className="truncate">{compLoc}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span>{compSize}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="font-extrabold text-lg text-[#242424] mb-1">{comp.name}</h3>
+                  <div className="pt-5 mt-4 border-t border-zinc-100 flex items-center justify-between">
+                    {compWeb && (
+                      <a
+                        href={compWeb}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-zinc-500 hover:text-black flex items-center gap-1"
+                      >
+                        <span>Website</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
 
-                  <p className="text-xs text-zinc-500 mb-3">{comp.industry || 'Technology'}</p>
-
-                  <p className="text-xs text-zinc-600 line-clamp-3 leading-relaxed mb-4">
-                    {comp.description}
-                  </p>
-
-                  <div className="space-y-1.5 text-xs text-zinc-500 pt-3 border-t border-zinc-100">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                      <span className="truncate">{comp.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                      <span>{comp.size}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-5 mt-4 border-t border-zinc-100 flex items-center justify-between">
-                  {comp.website && (
-                    <a
-                      href={comp.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-semibold text-zinc-500 hover:text-black flex items-center gap-1"
+                    <Link
+                      to={`/jobs?keyword=${encodeURIComponent(compName)}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#242424] hover:text-black bg-[#C5F36A] hover:bg-[#b4e850] px-3.5 py-1.5 rounded-xl transition-all shadow-xs ml-auto"
                     >
-                      <span>Website</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-
-                  <Link
-                    to={`/jobs?keyword=${encodeURIComponent(comp.name)}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#242424] hover:text-black bg-[#C5F36A] hover:bg-[#b4e850] px-3.5 py-1.5 rounded-xl transition-all shadow-xs ml-auto"
-                  >
-                    <span>View Jobs</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
+                      <span>View Jobs</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
