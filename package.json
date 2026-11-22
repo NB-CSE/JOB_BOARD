@@ -10,6 +10,6 @@
     "build:frontend": "cd frontend && npm run build"
   },
   "keywords": ["job-board", "react", "express", "mongodb", "tailwind", "jwt"],
-  "author": "",
+  "author": "Naresh Behra <nareshbehra911@gmail.com>",
   "license": "ISC"
 }

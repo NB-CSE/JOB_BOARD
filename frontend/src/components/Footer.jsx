@@ -139,7 +139,7 @@ const Footer = () => {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-          <p>© {new Date().getFullYear()} Elevate Careers Platform. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Elevate Careers Platform. Engineered by <span className="text-[#C5F36A] font-semibold">Naresh Behra</span>. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Verified Employer Standards</span>
             <span>Security & Data Privacy</span>

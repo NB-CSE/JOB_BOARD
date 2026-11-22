@@ -9,7 +9,7 @@
     "seed": "node src/utils/seedData.js"
   },
   "keywords": ["job-board", "express", "mongodb", "mern"],
-  "author": "",
+  "author": "Naresh Behra <nareshbehra911@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
