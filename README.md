@@ -1,1 +1,1 @@
-# Elevate - Tech Recruitment Platform
+# Tech Recruitment Platform
